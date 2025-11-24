@@ -1,47 +1,17 @@
-1. Clone the repo without git history
+# React Practice
 
-```bash
-mkdir new_project
-cd new_project
-git clone git@github.com:jadenbertino/next-js-boilerplate.git .
-rm -rf .git
-git init
-git add .
-git commit -m "Next.js boilerplate"
-```
+This repo provides a list of resources for practicing React, and a starter React + Next.js template that can be used as a sandbox for challenges.
 
-2. Install dependencies
+### Challenges
 
-```bash
-pnpm install
-```
+- [ReactPractice.dev](https://reactpractice.dev/start-here/#week-1)
+- [HackerRank/React](https://www.hackerrank.com/domains/react)
+- [Reactery.com](https://www.reacterry.com/portal/challenges) => Click "React"
+- [GreatFrontEnd](https://www.greatfrontend.com/questions/react-interview-questions)
+- [ReactChallenges.live](https://reactchallenges.live/dashboard/overview)
+- [alexgurr/react-coding-challenges](https://github.com/alexgurr/react-coding-challenges?tab=readme-ov-file#the-challenges)
 
-3. Add project to vercel
+### Projects
 
-- [ ] Vercel > Add project > Add github repository
-- [ ] Confirm that the deployment works
-
-4. Configure environment variables
-
-- [ ] Update `src/env/client.ts` and `src/env/server.ts` with the correct environment variables
-- [ ] Create a doppler project
-- [ ] Set `DOPPLER_TOKEN` in `env/.env.[development | staging | production]`
-- [ ] Configure doppler > vercel integration
-  - [ ] Go to https://vercel.com/integrations/doppler => setup the integration from vercel’s end. Do NOT start the connection from doppler, trust me you will get issues.
-  - [ ] Go to project > settings > Environment variables > confirm that you see doppler env vars were synced (should have doppler icon + be marked as sensitive)
-- [ ] Configure all environment variables in doppler
-- [ ] Set `ENVIRONMENT` variable when working locally
-
-4. Run the app locally
-
-```bash
-pnpm dev
-```
-
-5. Push to staging environment
-
-## Additional Useful Tools
-
-- Component Library (e.g. shadcn/ui, tailwind plus, etc)
-- Tanstack Query
-- Sentry
+- [DevChallenges.io](https://devchallenges.io/projects/front-end)
+- [FrontendMentor](https://www.frontendmentor.io/challenges?languages=JS&sort=position%7Casc&type=free-plus%2Cfree)
