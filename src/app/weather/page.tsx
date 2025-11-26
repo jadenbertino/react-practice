@@ -8,27 +8,50 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Http } from '@/lib/http'
-import { serialize } from '@/lib/logs/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useState, type Dispatch, type SetStateAction } from 'react'
 import z from 'zod'
+
+const CountrySchema = z.object({
+  isoCode: z.string(),
+  name: z
+    .array(
+      z.object({
+        text: z.string().describe('The name of the country'),
+      }),
+    )
+    .nonempty()
+    .transform((items) => items[0]!.text),
+})
+
+type Country = z.infer<typeof CountrySchema>
+type SelectedCountry = Country | undefined
+
+const HolidaySchema = z
+  .object({
+    id: z.string(),
+    startDate: z.string().transform((s) => new Date(s)),
+    endDate: z.string().transform((s) => new Date(s)),
+    name: z
+      .array(
+        z.object({
+          text: z.string().describe('The name of the holiday'),
+        }),
+      )
+      .nonempty()
+      .transform((items) => items[0]!.text),
+  })
+  .loose()
 
 /**
  * @see https://reactpractice.dev/exercise/build-a-public-holidays-app/?utm_source=calendar.reactpractice.dev&utm_medium=social&utm_campaign=calendar-v1
  */
 export default function WeatherPage() {
-  const [country, setCountry] = useState('hi')
+  const [country, setCountry] = useState<SelectedCountry>()
 
   return (
     <Container>
@@ -36,27 +59,70 @@ export default function WeatherPage() {
         country={country}
         setCountry={setCountry}
       />
+      <Holidays country={country} />
     </Container>
   )
 }
 
+const Holidays = ({ country }: { country: SelectedCountry }) => {
+  const { data: holidays, error } = useQuery({
+    queryKey: ['countries', 'list', country],
+    queryFn: async () => {
+      const holidays = await holidaysApi.get('/PublicHolidays', {
+        params: {
+          countryIsoCode: country?.isoCode,
+          validFrom: '2023-01-01',
+          validTo: '2023-12-31',
+          languageIsoCode: 'en',
+        },
+        schema: z.array(HolidaySchema),
+      })
+      return holidays.sort(
+        (a, b) => a.startDate.getTime() - b.startDate.getTime(),
+      )
+    },
+    enabled: Boolean(country),
+  })
+
+  if (error) {
+    console.log(error)
+    return <div>error</div>
+  }
+
+  if (!country) return
+
+  return (
+    <div>
+      <h1 className='font-bold'>Holidays for {country.name} </h1>
+      <ul className='pl-4'>
+        {holidays?.map((holiday) => (
+          <li
+            key={holiday.id}
+            className='list-disc'
+          >
+            [{holiday.startDate.toLocaleDateString()}] {holiday.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 type CountriesListProps = {
-  country: string
-  setCountry: Dispatch<SetStateAction<string>>
+  country: SelectedCountry
+  setCountry: Dispatch<SetStateAction<SelectedCountry>>
 }
 
 const CountriesList = ({ country, setCountry }: CountriesListProps) => {
   const { data: countries } = useQuery({
     queryKey: ['countries', 'list'],
     queryFn: async () => {
-      const data = await holidaysApi.get('/Countries', {
+      return await holidaysApi.get('/Countries', {
         params: {
           languageIsoCode: 'en',
         },
         schema: z.array(CountrySchema),
       })
-      const countries = data.map((item) => item.name[0]?.text).filter(Boolean)
-      return countries
     },
   })
 
@@ -68,34 +134,22 @@ const CountriesList = ({ country, setCountry }: CountriesListProps) => {
       <DropdownMenuContent className='max-h-[400px]'>
         {country && (
           <DropdownMenuGroup>
-            <DropdownMenuLabel>{country}</DropdownMenuLabel>
+            <DropdownMenuLabel>{country.name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
           </DropdownMenuGroup>
         )}
         {countries?.map((country) => (
           <DropdownMenuItem
-            key={country}
+            key={country.isoCode}
             onSelect={() => setCountry(country!)}
           >
-            {country}
+            {country.name}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
-
-const CountrySchema = z.object({
-  name: z
-    .array(
-      z.object({
-        text: z.string().describe('The name of the country'),
-      }),
-    )
-    .nonempty(),
-})
-
-// {"isoCode":"AD","name":[ {"language":"EN","text":"Andorra"}],"officialLanguages":["CA"]},
 
 const holidaysApi = new Http({
   baseURL: 'https://openholidaysapi.org',
