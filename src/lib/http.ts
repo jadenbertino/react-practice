@@ -168,4 +168,4 @@ class Http {
 
 const http = new Http()
 
-export { http }
+export { http, Http }
