@@ -32,7 +32,11 @@ export default function RootLayout({
       <body
         className={`h-full ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          
+          {children}
+          
+          </Providers>
         <Toaster />
       </body>
     </html>
