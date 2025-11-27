@@ -29,6 +29,7 @@ const eslintConfig = defineConfig([
         acc[`custom-rules/${ruleName}`] = 'error'
         return acc
       }, {}),
+      '@next/next/no-img-element': 'off',
     },
   },
   prettier,
